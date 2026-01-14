@@ -1,4 +1,7 @@
 # 📍 LOCALS : Riyadh Through Local Eyes
+[![Framework](https://img.shields.io/badge/Framework-ASP.NET%20Core%208.0%20MVC-512bd4)](https://dotnet.microsoft.com/en-us/apps/aspnet/mvc)
+[![Database](https://img.shields.io/badge/Database-SQL%20Server-red)](https://www.microsoft.com/en-us/sql-server/)
+[![ORM](https://img.shields.io/badge/ORM-Entity%20Framework%20Core-blueviolet)](https://learn.microsoft.com/en-us/ef/core/)
 
 ``LOCALS`` is an interactive platform designed to enrich the digital tourism content of the **Riyadh Region**. Built on the principle of **Crowdsourced Tourism**, the platform empowers local residents to document hidden gems, heritage sites, and modern attractions that represent the authentic spirit of the Saudi capital.
 
@@ -35,6 +38,14 @@ The project follows the **MVC (Model-View-Controller)** pattern to ensure a clea
 * **Models:** Strongly typed data structures representing Riyadh's landmarks, users, and media galleries.
 * **Views:** Responsive Razor templates with a localized RTL (Right-to-Left) layout and a "National Green" visual identity.
 * **Controllers:** Logical engines handling data processing, geographic coordinate mapping, and secure authentication.
+
+---
+
+## 🔐 Database Engineering (ERD)
+The relational schema is optimized for **Referential Integrity** and normalized to 3NF:
+- **Places Table:** The central entity node, linked via Foreign Keys to `Districts` and `Categories`.
+- **Media Gallery:** Implements a **1:N (One-to-Many)** relationship via the `PlaceImages` table to handle polymorphic media assets.
+- **Workflow State Management:** A dedicated `UpgradeRequests` table manages user role transitions, storing proof of expertise and proposed local landmarks.
 
 ---
 
