@@ -1,0 +1,116 @@
+﻿/* --- 1. إعدادات الهوية والألوان --- */
+:root {
+    --national-green: #004d33; /* الزيتي الملكي */
+    --heritage-brown: #8b5a2b; /* البني التراثي */
+    --sand-bg: #f4f1ea; /* الخلفية الرملية */
+}
+
+/* --- 2. تطبيق الخط على كامل الموقع --- */
+body {
+    font-family: 'Baloo Bhaijaan 2', cursive;
+    background-color: var(--sand-bg) !important;
+    color: var(--national-green);
+    direction: rtl;
+    text-align: right;
+    font-size: 1.15rem; /* الخط يمتاز بوضوح عالي لذا هذا الحجم مناسب */
+    margin-bottom: 60px;
+}
+
+/* --- 3. العناوين (باستخدام الوزن العريض 700) --- */
+h1, h2, h3, h4, h5, h6,
+.modal-title,
+.text-national {
+    font-family: 'Baloo Bhaijaan 2', cursive;
+    font-weight: 700;
+    color:whitesmoke;
+}
+
+navbar-brand {
+    font-family: 'Baloo Bhaijaan 2', cursive;
+    font-weight: 700;
+    color: var(--national-green);
+}
+/* --- 4. الأزرار والقوائم (وزن متوسط 600) --- */
+.nav-link, .btn, .uiverse-btn {
+    font-family: 'Baloo Bhaijaan 2', cursive;
+    font-weight: 600;
+}
+
+    /* تحسين شكل الفوكس باللون الزيتي */
+    .form-control:focus, .btn:focus {
+        box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem rgba(0, 77, 51, 0.25);
+        border-color: var(--national-green);
+    }
+
+/* --- 5. استثناء نصوص الهيرو (يبقى التصميم أبيض) --- */
+.home-page .hero-section h1,
+.home-page .hero-section p {
+    color: #ffffff !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3); /* لمسة جمالية للنص فوق الصورة */
+}
+
+/* --- 6. تنسيق الحقول --- */
+.form-floating > .form-control::placeholder {
+    text-align: end;
+}
+
+/* --- 7. البطاقات وروابط التفاصيل --- */
+.uiverse-link {
+    color: var(--heritage-brown) !important;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+    .uiverse-link:hover {
+        color: var(--national-green) !important;
+    }
+
+/* --- إبراز الخريطة وجعلها ثلاثية الأبعاد --- */
+#main-map {
+    height: 500px;
+    border-radius: 40px; /* زوايا دائرية أكثر نعومة */
+    z-index: 1;
+    border: 8px solid #ffffff; /* إطار أبيض عريض ليعمل كفاصل */
+    box-shadow: 0 20px 40px rgba(0, 77, 51, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1); /* ظلال مزدوجة لإعطاء عمق */
+    margin-top: 20px;
+    transition: transform 0.4s ease; /* حركة بسيطة عند التفاعل */
+    overflow: hidden;
+    position: relative;
+}
+
+    /* تأثير عند مرور الماوس على منطقة الخريطة */
+    #main-map:hover {
+        transform: translateY(-5px); /* ترتفع الخريطة قليلاً لإعطاء شعور بالبروز */
+        box-shadow: 0 30px 60px rgba(0, 77, 51, 0.2);
+    }
+
+    /* إضافة حافة بنية تراثية سفلية لزيادة البروز */
+    #main-map::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 10px;
+        background-color: var(--heritage-brown);
+        z-index: 1000;
+    }
+
+.main-header-logo-only {
+    height: 100px; /* تكبير الحجم ليكون واضحاً جداً بما أنه الوحيد */
+    width: auto;
+    object-fit: contain;
+    padding: 5px 0;
+    transition: transform 0.1s ease-in-out;
+}
+
+    /* إضافة تأثير بسيط عند مرور الماوس */
+    .main-header-logo-only:hover {
+        transform: scale(1.08);
+    }
+
+/* التأكد من أن الهيدر لا يقيد اللوجو الكبير */
+.navbar {
+    min-height: 100px;
+    padding: 0 15px !important;
+}
