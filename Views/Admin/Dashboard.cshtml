@@ -1,0 +1,357 @@
+﻿@model IEnumerable<lLOCALS.Models.Place>
+@{
+    ViewData["Title"] = "لوحة التحكم المركزية";
+    var upgradeRequests = (IEnumerable<lLOCALS.Models.UpgradeRequest>)ViewBag.UpgradeRequests;
+}
+
+@* استيراد خط Tajawal بأوزان متعددة للوضوح التام *@
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
+
+<div class="container mt-5 dashboard-main-bg animate__animated animate__fadeIn" dir="rtl">
+
+    @* --- 1. قسم الإحصائيات --- *@
+    <div class="row mb-5 g-4">
+        <div class="col-md-4">
+            <div class="identity-card-ultra prominent-shadow h-100">
+                <div class="identity-icon bg-national shadow-sm text-white">
+                    <i class="bi bi-geo-alt-fill"></i>
+                </div>
+                <div class="identity-content">
+                    <span class="identity-label">المعالم المعتمدة</span>
+                    <h2 class="identity-value text-national">@ViewBag.PlacesCount</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="identity-card-ultra prominent-shadow h-100">
+                <div class="identity-icon bg-heritage shadow-sm text-white">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="identity-content">
+                    <span class="identity-label">الخبراء المحليون</span>
+                    <h2 class="identity-value text-heritage">@ViewBag.ContributorsCount</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="identity-card-ultra prominent-shadow h-100 highlight-waiting">
+                <div class="identity-icon bg-white shadow-sm">
+                    <i class="bi bi-clock-history text-national"></i>
+                </div>
+                <div class="identity-content">
+                    <span class="identity-label text-white">طلبات بانتظارك</span>
+                    <h2 class="identity-value text-white">@(Model.Count() + (upgradeRequests?.Count() ?? 0))</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* --- 2. جدول المراجعة --- *@
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="identity-panel prominent-shadow border-0 bg-white">
+                <div class="panel-header-identity border-bottom py-4 px-5 bg-white">
+                    <h4 class="fw-bold text-national m-0 mb-4 fs-3">مركز التحكم والمراجعة</h4>
+
+                    <ul class="nav nav-pills custom-identity-pills" id="adminTab" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active shadow-sm" id="places-tab" data-bs-toggle="tab" data-bs-target="#places-content">
+                                <i class="bi bi-map-fill me-2"></i> مراجعة الأماكن (@Model.Count())
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link shadow-sm ms-3" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-content">
+                                <i class="bi bi-person-badge-fill me-2"></i> طلبات الترقية (@(upgradeRequests?.Count() ?? 0))
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="p-5">
+                    <div class="tab-content">
+                        @* --- تبويب الأماكن --- *@
+                        <div class="tab-pane fade show active" id="places-content">
+                            <div class="table-responsive">
+                                <table class="table identity-prominent-table align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>اسم المعلم</th>
+                                            <th>التصنيف</th>
+                                            <th>الحي</th>
+                                            <th class="text-center">الإجراء</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var place in Model)
+                                        {
+                                            var isOld = (DateTime.Now - place.CreatedAt).TotalHours > 24;
+                                            <tr class="admin-row @(isOld ? "priority-warning" : "")">
+                                                <td class="fw-bold text-dark fs-5 py-4">@place.Title</td>
+                                                <td><span class="badge-heritage-bold">@place.Category?.Name</span></td>
+                                                <td><div class="text-national-muted fw-bold small"><i class="bi bi-geo-alt me-1 text-danger"></i> @place.District?.Name</div></td>
+                                                <td class="text-center">
+                                                    <div class="action-btn-group">
+                                                        <button class="btn-action-identity view" title="عرض" data-bs-toggle="modal" data-bs-target="#detailModal-@place.PlaceId"><i class="bi bi-eye-fill"></i></button>
+                                                        <form asp-action="ApprovePlace" asp-route-id="@place.PlaceId" method="post" class="d-inline"><button class="btn-action-identity approve"><i class="bi bi-check-lg"></i></button></form>
+                                                        <form asp-action="RejectPlace" asp-route-id="@place.PlaceId" method="post" class="d-inline"><button class="btn-action-identity reject"><i class="bi bi-x-lg"></i></button></form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            @* مودال تفاصيل المعلم *@
+                                            <div class="modal fade" id="detailModal-@place.PlaceId" tabindex="-1">
+                                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                                                    <div class="modal-content border-0 rounded-5 prominent-shadow">
+                                                        <div class="modal-header d-flex justify-content-between align-items-center py-4 px-4 border-0 bg-white">
+                                                            <h5 class="modal-title fw-900 fs-4" style="color: #252d1f !important;">
+                                                                مراجعة: @place.Title
+                                                            </h5>
+                                                            <button type="button" class="btn-close ms-0 shadow-none" data-bs-dismiss="modal" style="filter: brightness(0);"></button>
+                                                        </div>
+                                                        <div class="modal-body p-5 text-end bg-light-cream">
+                                                            <h6 class="fw-bold text-national border-bottom pb-2 mb-3">الوصف المعروض</h6>
+                                                            <p class="text-dark leading-relaxed fw-medium">@place.Description</p>
+                                                            <h6 class="fw-bold text-national border-bottom pb-2 mb-3 mt-4">الصور المرفقة</h6>
+                                                            <div class="d-flex flex-wrap gap-3">
+                                                                @if (place.Images != null)
+                                                                {
+                                                                    foreach (var img in place.Images)
+                                                                    {
+                                                                        <img src="@Url.Content("~" + img.ImagePath)" class="img-preview-identity shadow border" />
+                                                                    }
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        @* --- تبويب طلبات الترقية (تم التعديل هنا) --- *@
+                        <div class="tab-pane fade" id="users-content">
+                            <div class="table-responsive">
+                                <table class="table identity-prominent-table align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>اسم المتقدم</th>
+                                            <th>الخبرة والسبب</th>
+                                            <th>أمثلة للأماكن</th>
+                                            <th class="text-center">الإجراء</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var req in upgradeRequests ?? new List<lLOCALS.Models.UpgradeRequest>())
+                                        {
+                                            <tr>
+                                                <td class="fw-bold text-dark fs-5 py-4">
+                                                    @req.FullName
+                                                    <div class="text-muted small fw-medium">@req.User?.Email</div>
+                                                </td>
+                                                <td style="max-width: 300px;">
+                                                    <p class="mb-0 text-dark small leading-relaxed fw-medium">
+                                                        <i class="bi bi-chat-left-quote me-1 text-national"></i>
+                                                        @req.Reason
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <div class="badge bg-light text-national border px-3 py-2 rounded-pill fw-bold">
+                                                        <i class="bi bi-geo-fill me-1"></i>
+                                                        @req.Examples
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="action-btn-group">
+                                                        <form asp-action="ApproveRequest" method="post" class="d-inline">
+                                                            <input type="hidden" name="requestId" value="@req.UpgradeRequestId" />
+                                                            <button class="btn-action-identity approve"><i class="bi bi-check-lg"></i></button>
+                                                        </form>
+                                                        <form asp-action="RejectRequest" method="post" class="d-inline">
+                                                            <input type="hidden" name="requestId" value="@req.UpgradeRequestId" />
+                                                            <button class="btn-action-identity reject"><i class="bi bi-x-lg"></i></button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        :root {
+            --national-green: #1b513e;
+            --heritage-gold: #8b5a2b;
+            --cream-bg: #f4f1ea;
+        }
+
+        body {
+            background-color: var(--cream-bg) !important;
+            font-family: 'Tajawal', sans-serif !important;
+        }
+
+        .prominent-shadow {
+            box-shadow: 0 30px 60px rgba(0,0,0,0.12) !important;
+            border: 1.5px solid rgba(255,255,255,0.8) !important;
+            border-radius: 45px !important;
+        }
+
+        .identity-card-ultra {
+            background: #fff;
+            padding: 40px;
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            border-bottom: 8px solid var(--national-green);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+            .identity-card-ultra:hover {
+                transform: translateY(-15px);
+            }
+
+        .highlight-waiting {
+            background: linear-gradient(135deg, var(--national-green), #2a7a5e) !important;
+            border-bottom: none !important;
+        }
+
+        .identity-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: var(--national-green);
+        }
+
+        .identity-label {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #495057;
+        }
+
+        .identity-value {
+            font-size: 2.8rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .custom-identity-pills .nav-link {
+            border-radius: 18px;
+            color: var(--national-green);
+            font-weight: 800;
+            padding: 15px 30px;
+            background: #f0f3f2;
+            transition: 0.3s;
+        }
+
+            .custom-identity-pills .nav-link.active {
+                background: var(--national-green) !important;
+                color: white !important;
+                box-shadow: 0 10px 25px rgba(27, 81, 62, 0.3);
+            }
+
+        .identity-prominent-table thead th {
+            background: #fafafa;
+            padding: 25px;
+            color: var(--national-green);
+            font-weight: 900;
+            border-bottom: 2px solid var(--cream-bg);
+            font-size: 1.1rem;
+        }
+
+        .badge-heritage-bold {
+            background: #fdfaf0;
+            color: var(--heritage-gold);
+            border: 2px solid var(--heritage-gold);
+            padding: 10px 25px;
+            border-radius: 15px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .action-btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-action-identity {
+            width: 50px;
+            height: 50px;
+            border-radius: 18px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            cursor: pointer;
+            font-size: 1.4rem;
+        }
+
+            .btn-action-identity.view {
+                background: #eef6ff;
+                color: #3182ce;
+            }
+
+            .btn-action-identity.approve {
+                background: #ecfdf5;
+                color: #10b981;
+            }
+
+            .btn-action-identity.reject {
+                background: #fff5f5;
+                color: #ef4444;
+            }
+
+            .btn-action-identity:hover {
+                transform: scale(1.2) rotate(5deg);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            }
+
+        .img-preview-identity {
+            width: 160px;
+            height: 160px;
+            border-radius: 25px;
+            object-fit: cover;
+            border: 5px solid #fff;
+        }
+
+        .priority-warning {
+            border-right: 12px solid var(--heritage-gold) !important;
+            background-color: #fffcf7 !important;
+        }
+
+        .text-national {
+            color: var(--national-green) !important;
+        }
+
+        .text-heritage {
+            color: var(--heritage-gold) !important;
+        }
+
+        .fw-900 {
+            font-weight: 900;
+        }
+
+        .bg-light-cream {
+            background-color: #fbfbf8;
+        }
+    </style>
+}

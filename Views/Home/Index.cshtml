@@ -1,0 +1,387 @@
+﻿@model IEnumerable<lLOCALS.Models.Place>
+@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "الرئيسية";
+    var userRole = Context.Session.GetString("UserRole");
+    ViewData["BodyClass"] = "home-page";
+}
+
+@if (string.IsNullOrEmpty(userRole))
+{
+    <div class="hero-section">
+        <div class="hero-content text-center px-3">
+            <h1 class="display-3 fw-bold animate__animated animate__fadeInDown text-white">مرحبا بكم في LOCALS</h1>
+            <p class="fs-4 mt-3 animate__animated animate__fadeInUp animate__delay-1s text-white-50">استكشف وطنك بعيون محلية وأصالة تراثية</p>
+            <div class="mt-5 animate__animated animate__zoomIn animate__delay-2s">
+                <a asp-controller="Account" asp-action="Login" class="btn-start shadow-lg">ابدأ الرحلة</a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid mt-4 px-4" dir="rtl">
+
+        @if (userRole == "User")
+        {
+            <div class="alert alert-upgrade d-flex justify-content-between align-items-center shadow-sm mb-4">
+                <div class="d-flex align-items-center">
+                    <span class="fs-4 me-3">💡</span>
+                    <span>هل أنت خبير بمنطقتك ؟ ساهم معنا وأضف أماكنك المفضلة !</span>
+                </div>
+                <button type="button" class="btn btn-light btn-sm rounded-pill fw-bold px-4 text-national"
+                        data-bs-toggle="modal" data-bs-target="#upgradeModal">
+                    طلب ترقية
+                </button>
+            </div>
+        }
+
+        <div class="modal fade" id="upgradeModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header text-white rounded-top-4" style="background-color: var(--national-green);">
+                        <h5 class="modal-title fw-bold">🌟 طلب الانضمام كمساهم محلي</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4" style="border-bottom: 5px solid var(--heritage-brown);">
+                        <form asp-controller="Account" asp-action="RequestUpgrade" method="post">
+                            <div class="mb-3 text-end">
+                                <label class="form-label fw-bold">الاسم الكامل</label>
+                                <input name="FullName" class="form-control rounded-3" placeholder="ادخل اسمك الثلاثي" required />
+                            </div>
+                            <div class="mb-3 text-end">
+                                <label class="form-label fw-bold">لماذا تريد الانضمام؟</label>
+                                <textarea name="Reason" class="form-control rounded-3" rows="3" placeholder="اشرح لنا خبرتك في منطقتك" required></textarea>
+                            </div>
+                            <div class="mb-3 text-end">
+                                <label class="form-label fw-bold">أمثلة لأماكن تقترحها</label>
+                                <input name="Examples" class="form-control rounded-3" placeholder="مثلاً: مقهى كذا، منتزه كذا" required />
+                            </div>
+                            <button type="submit" class="btn btn-national w-100 rounded-pill py-2 fw-bold">إرسال الطلب</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-national m-0">📍 استكشف المعالم من حولك</h2>
+            @if (userRole == "Local Contributor")
+            {
+                <a asp-controller="Contributor" asp-action="Create" class="btn btn-national rounded-pill px-4 shadow-sm">إضافة معلم جديد +</a>
+            }
+        </div>
+
+        <div class="d-flex justify-content-start align-items-center gap-3 mb-4 animate__animated animate__fadeIn">
+
+            <div class="filter-item-single">
+                <span class="filter-tag-label"><i class="bi bi-tags-fill"></i> التصنيف</span>
+                <select id="categoryFilter" class="modern-select-dark shadow-sm">
+                    <option value="all">كل التصنيفات</option>
+                    @if (ViewBag.Categories != null)
+                    {
+                        @foreach (var cat in (IEnumerable<lLOCALS.Models.Category>)ViewBag.Categories)
+                        {
+                            <option value="@cat.Name">@cat.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="filter-item-single">
+                <span class="filter-tag-label"><i class="bi bi-geo-alt-fill"></i> الحي / المنطقة</span>
+                <select id="districtFilter" class="modern-select-dark shadow-sm">
+                    <option value="all">كل الأحياء</option>
+                    @if (ViewBag.AllDistricts != null)
+                    {
+                        @foreach (var dist in (IEnumerable<lLOCALS.Models.District>)ViewBag.AllDistricts)
+                        {
+                            <option value="@dist.Name">@dist.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div id="main-map" class="shadow-sm border border-white border-5 mb-5"></div>
+
+        <div class="mt-5">
+            <h3 class="fw-bold mb-4 border-bottom-heritage pb-2 text-national">🌟 معالم مختارة لك</h3>
+            <div class="row" id="landmarksContainer">
+                @foreach (var place in Model)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4 landmark-card"
+                         data-category="@place.Category?.Name"
+                         data-district="@place.District?.Name">
+
+                        <div class="card h-100 border-0 shadow-sm place-card">
+                            @{
+                                var imgPath = place.Images?.FirstOrDefault()?.ImagePath;
+                                var finalImageUrl = !string.IsNullOrEmpty(imgPath)
+                                ? Url.Content("~" + imgPath.Replace("\\", "/"))
+                                : Url.Content("~/images/default-place.jpg");
+                            }
+
+                            <div class="card-img-wrapper">
+                                <img src="@finalImageUrl" class="card-img-top" alt="@place.Title" />
+                                <span class="badge-category">@place.Category?.Name</span>
+                            </div>
+
+                            <div class="card-body text-end">
+                                <h5 class="card-title fw-bold text-national mb-1">@place.Title</h5>
+
+                                @{
+                                    Random rand = new Random();
+                                    int fullStars = rand.Next(3, 6);
+                                    int totalVotes = rand.Next(50, 500);
+                                }
+
+                                <div class="mb-2 d-flex align-items-center justify-content-end gap-2">
+                                    <span class="text-muted small">(@totalVotes تقييم)</span>
+                                    <div class="text-warning">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="bi @(i <= fullStars ? "bi-star-fill" : "bi-star text-light-emphasis")"></i>
+                                        }
+                                    </div>
+                                    <strong class="text-national">@fullStars.0</strong>
+                                </div>
+
+                                <p class="card-text text-muted small text-truncate">@place.Description</p>
+
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                    <small class="text-muted">📍 @place.District?.Name</small>
+                                    <button type="button" class="uiverse-link border-0 bg-transparent fw-bold"
+                                            data-bs-toggle="modal" data-bs-target="#detailsModal-@place.PlaceId">
+                                        عرض التفاصيل
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="detailsModal-@place.PlaceId" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content border-0 rounded-5 shadow-lg overflow-hidden">
+                                <div class="modal-header border-0 text-white p-4" style="background-color: var(--national-green);">
+                                    <h5 class="modal-title fw-bold">@place.Title</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-0 text-end">
+                                    <img src="@finalImageUrl" class="w-100 shadow-sm" style="height: 350px; object-fit: cover;" onerror="this.src='/images/default-place.jpg';" />
+                                    <div class="p-4 bg-white">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="badge bg-light text-national border px-3 py-2 rounded-pill fw-bold">@place.Category?.Name</span>
+                                            <span class="text-muted fw-bold"><i class="bi bi-geo-alt-fill"></i> @place.District?.Name</span>
+                                        </div>
+                                        <h6 class="fw-bold text-national mb-2 fs-5">الوصف الكامل:</h6>
+                                        <p class="text-muted mb-4" style="line-height: 1.8; font-size: 0.95rem;">@place.Description</p>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-center">
+                                    <button type="button" class="btn btn-national px-5 rounded-pill shadow-sm" data-bs-dismiss="modal">إغلاق</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+        :root {
+            --national-green: #004d33;
+            --heritage-brown: #8b5a2b;
+        }
+
+        .filter-item-single {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+
+        .filter-tag-label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--national-green);
+            margin-right: 5px;
+        }
+
+        .modern-select-dark {
+            appearance: none;
+            background-color: #f0f2f0 !important;
+            border: 2px solid #e0e4e0 !important;
+            border-radius: 15px;
+            padding: 10px 15px 10px 40px;
+            color: #0d2c21 !important;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 180px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23004d33' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 15px center;
+            background-size: 10px;
+        }
+
+            .modern-select-dark:hover {
+                background-color: #e8eae8 !important;
+                border-color: var(--national-green) !important;
+            }
+
+        .border-national {
+            border-color: var(--national-green) !important;
+        }
+
+        .alert-upgrade {
+            background-color: var(--national-green) !important;
+            color: white !important;
+            border-radius: 50px !important;
+        }
+
+        .text-national {
+            color: var(--national-green) !important;
+        }
+
+        .uiverse-link {
+            color: var(--heritage-brown);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .hero-section {
+            background: linear-gradient(rgba(0, 77, 51, 0.6), rgba(20, 20, 20, 0.7)), url('/images/background.jpg') center/cover no-repeat;
+            height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin: -25px -15px;
+            border-radius: 0 0 50px 50px;
+        }
+
+        .btn-start {
+            background-color: var(--national-green);
+            color: white;
+            padding: 15px 60px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: bold;
+            border-bottom: 4px solid var(--heritage-brown);
+        }
+
+        #main-map {
+            height: 500px;
+            border-radius: 30px;
+            z-index: 1;
+        }
+
+        .place-card {
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+            .place-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+            }
+
+        .card-img-wrapper {
+            position: relative;
+            height: 220px;
+            background-color: #f8f9fa;
+        }
+
+        .card-img-top {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .badge-category {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.9);
+            color: var(--national-green);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .btn-national {
+            background-color: var(--national-green);
+            color: white;
+            border: none;
+        }
+
+        body {
+            background-color: #f4f1ea !important;
+        }
+
+        /* إجبار زر الإغلاق على التموضع في اليسار في المودال */
+        .modal-header {
+            display: flex !important;
+            flex-direction: row !important; /* يضمن بقاء العنوان يمين والزر يسار */
+            justify-content: space-between !important;
+        }
+
+            .modal-header .btn-close {
+                margin: 0 !important;
+                margin-right: auto !important; /* يدفع الزر لأقصى اليسار في حال كان الاتجاه RTL */
+            }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (document.getElementById('main-map')) {
+                var map = L.map('main-map').setView([24.7136, 46.6753], 6);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                var places = @Html.Raw(Json.Serialize(Model));
+                if (places) {
+                    places.forEach(p => {
+                        if (p.latitude && p.longitude) {
+                            L.marker([p.latitude, p.longitude]).addTo(map)
+                             .bindPopup(`<div class="text-end"><b class="text-national">${p.title}</b><br>${p.district ? p.district.name : ''}</div>`);
+                        }
+                    });
+                }
+            }
+
+            function runFilters() {
+                var selectedCat = document.getElementById('categoryFilter').value;
+                var selectedDist = document.getElementById('districtFilter').value;
+                var cards = document.querySelectorAll('.landmark-card');
+
+                cards.forEach(function(card) {
+                    var catMatch = (selectedCat === 'all' || card.getAttribute('data-category') === selectedCat);
+                    var distMatch = (selectedDist === 'all' || card.getAttribute('data-district') === selectedDist);
+
+                    if (catMatch && distMatch) {
+                        card.style.display = 'block';
+                        card.classList.add('animate__fadeIn');
+                    } else {
+                        card.style.display = 'none';
+                        card.classList.remove('animate__fadeIn');
+                    }
+                });
+            }
+
+            document.getElementById('categoryFilter').addEventListener('change', runFilters);
+            document.getElementById('districtFilter').addEventListener('change', runFilters);
+        });
+    </script>
+}

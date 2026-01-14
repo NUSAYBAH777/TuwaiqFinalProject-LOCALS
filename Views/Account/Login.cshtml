@@ -1,0 +1,169 @@
+﻿@model lLOCALS.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "تسجيل الدخول - iLOCALS";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+<div class="auth-wrapper" dir="rtl">
+    <div class="auth-card shadow-lg border-0">
+        @* الهيدر باللون الزيتي الفخم *@
+        <div class="auth-header py-4 text-center text-white">
+            <h2 class="fw-bold mb-0">LOCALS</h2>
+            <p class="small opacity-75 mt-2">مرحباً بك في منصة استكشاف المعالم المحلية</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5 text-end">
+            <form asp-action="Login" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                @* حقل البريد الإلكتروني *@
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-dark small">البريد الإلكتروني</label>
+                    <div class="input-group custom-input shadow-sm">
+                        <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                        <input name="Email" type="email" class="form-control" placeholder="example@mail.com" required />
+                    </div>
+                </div>
+
+                @* حقل كلمة المرور *@
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-dark small">كلمة المرور</label>
+                    <div class="input-group password-wrapper custom-input shadow-sm">
+                        <span class="input-group-text"><i class="fa fa-lock"></i></span>
+                        <input name="Password" id="loginPass" type="password" class="form-control" placeholder="••••••••" required />
+                        <button type="button" class="toggle-password" onclick="toggleView('loginPass', 'loginIcon')">
+                            <i id="loginIcon" class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                @* زر الدخول الموحد *@
+                <button type="submit" class="btn btn-national w-100 py-2 rounded-pill fw-bold shadow mt-2">
+                    تسجيل الدخول
+                </button>
+            </form>
+
+            <div class="text-center mt-5 border-top pt-4">
+                <p class="text-muted small mb-0">ليس لديك حساب بعد؟</p>
+                <a asp-action="Register" class="text-brown fw-bold text-decoration-none small">إنشاء حساب جديد</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        :root {
+            --national-green: #004d33; /* الزيتي الملكي */
+            --heritage-brown: #8b5a2b; /* البني التراثي */
+            --sand-bg: #f4f1ea; /* اللون الرملي/الترابي المطلوب */
+        }
+
+        /* هذا الجزء هو المسؤول عن تلوين الخلفية بالكامل */
+        body {
+            background-color: var(--sand-bg) !important;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .auth-wrapper {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* تمت إزالة اللون من هنا ليعتمد على لون الـ body */
+            padding: 20px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            background: white; /* الكارد يبقى أبيض ليبرز فوق الخلفية الترابية */
+            border-radius: 20px;
+            overflow: hidden;
+            border-bottom: 6px solid var(--heritage-brown) !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+
+        .auth-header {
+            background: var(--national-green);
+            position: relative;
+        }
+
+            .auth-header::after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: var(--heritage-brown);
+                opacity: 0.8;
+            }
+
+        /* بقية التنسيقات للحقول والأزرار */
+        .text-brown {
+            color: var(--heritage-brown);
+        }
+
+            .text-brown:hover {
+                color: var(--national-green);
+            }
+
+        .custom-input .input-group-text {
+            background-color: #f8f9fa;
+            color: var(--national-green);
+            border-radius: 0 15px 15px 0 !important;
+            border: 1px solid #dee2e6;
+        }
+
+        .custom-input .form-control {
+            border-radius: 15px 0 0 15px !important;
+            border: 1px solid #dee2e6;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            z-index: 10;
+            color: #adb5bd;
+            border: none;
+            background: none;
+        }
+
+        .btn-national {
+            background: var(--national-green);
+            color: white;
+            border: none;
+            transition: 0.3s ease;
+        }
+
+            .btn-national:hover {
+                background: #003624;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 77, 51, 0.3);
+            }
+    </style>
+
+    }
+
+@section Scripts {
+    <script>
+        function toggleView(inputId, iconId) {
+            var input = document.getElementById(inputId);
+            var icon = document.getElementById(iconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+    </script>
+}

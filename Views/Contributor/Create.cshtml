@@ -1,0 +1,190 @@
+﻿@model lLOCALS.Models.Place
+
+@{
+    ViewData["Title"] = "إضافة مكان - iLOCALS";
+}
+
+<div class="container mt-5 px-4" dir="rtl">
+    <div class="auth-card shadow-lg border-0 rounded-5 overflow-hidden bg-white mx-auto" style="max-width: 1100px;">
+
+        <div class="auth-header py-4 text-center text-white">
+            <h2 class="fw-bold mb-0">📍 إضافة معلم جديد</h2>
+            <p class="small opacity-75 mt-2">ساهم في توثيق معالم وطنك لتظهر للمجتمع</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+            <form asp-controller="Contributor" asp-action="Create" method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-lg-5 text-end order-lg-1">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-bold text-national small">اسم المكان</label>
+                            <input asp-for="Title" class="form-control custom-input-field" placeholder="مثلاً: قصر المصمك" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-bold text-national small">الوصف</label>
+                            <textarea asp-for="Description" class="form-control custom-input-field" rows="2" placeholder="اكتب نبذة مختصرة عن المعلم..."></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoryId" class="form-label fw-bold text-national small">التصنيف</label>
+                                <select asp-for="CategoryId" class="form-select custom-input-field" asp-items="ViewBag.CategoryId">
+                                    <option value="">-- اختر --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="DistrictId" class="form-label fw-bold text-national small">الحي</label>
+                                <select asp-for="DistrictId" class="form-select custom-input-field" asp-items="ViewBag.DistrictId">
+                                    <option value="">-- اختر --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-national small">📸 صور المكان</label>
+                            <div class="input-group">
+                                <input type="file" name="imageFiles" class="form-control custom-input-field" multiple accept="image/*" id="inputGroupFile" />
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem;">يمكنك اختيار أكثر من صورة (JPEG, PNG).</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="LocationDescription" class="form-label fw-bold text-national small">وصف دقيق للموقع (اختياري)</label>
+                            <input asp-for="LocationDescription" class="form-control custom-input-field" placeholder="بجانب بوابة رقم..." />
+                        </div>
+
+                        <input type="hidden" asp-for="Latitude" id="Latitude" />
+                        <input type="hidden" asp-for="Longitude" id="Longitude" />
+
+                        <button type="submit" class="btn btn-national w-100 py-2 rounded-pill fw-bold shadow-sm mt-2">
+                            حفظ المعلم ونشر الصور
+                        </button>
+                    </div>
+
+                    <div class="col-lg-7 mb-4 mb-lg-0 order-lg-2">
+                        <label class="form-label fw-bold d-block text-end text-national small mb-2">
+                            <i class="fa fa-map-marker-alt ms-1"></i> حدد الموقع بدقة على الخريطة
+                        </label>
+                        <div id="map" class="shadow-sm border-heritage-thin rounded-4"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <style>
+        :root {
+            --national-green: #004d33;
+            --heritage-brown: #8b5a2b;
+            --sand-bg: #f4f1ea;
+        }
+
+        body {
+            background-color: var(--sand-bg) !important;
+        }
+
+        .text-national {
+            color: var(--national-green);
+        }
+
+        .auth-card {
+            border-bottom: 6px solid var(--heritage-brown) !important;
+        }
+
+        .auth-header {
+            background: var(--national-green);
+            position: relative;
+        }
+
+            .auth-header::after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: var(--heritage-brown);
+                opacity: 0.8;
+            }
+
+        .custom-input-field {
+            border: 1px solid #dee2e6;
+            border-radius: 12px !important;
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+
+            .custom-input-field:focus {
+                border-color: var(--national-green);
+                box-shadow: 0 0 0 0.2rem rgba(0, 77, 51, 0.1);
+            }
+
+        #map {
+            height: 520px;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .border-heritage-thin {
+            border: 2px solid rgba(139, 90, 43, 0.2);
+        }
+
+        .btn-national {
+            background-color: var(--national-green);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+            .btn-national:hover {
+                background-color: #003624;
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 77, 51, 0.3);
+            }
+
+        /* تحسين شكل الجي وكودر (البحث في الخريطة) */
+        .leaflet-control-geocoder {
+            border-radius: 10px !important;
+            border: none !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script>
+        var map = L.map('map').setView([24.7136, 46.6753], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var marker;
+        var geocoder = L.Control.geocoder({
+            defaultMarkGeocode: false,
+            placeholder: "ابحث عن مدينة أو حي...",
+            collapsed: false
+        })
+        .on('markgeocode', function(e) {
+            var latlng = e.geocode.center;
+            updateLocation(latlng);
+            map.setView(latlng, 15);
+        }).addTo(map);
+
+        map.on('click', function (e) { updateLocation(e.latlng); });
+
+        function updateLocation(latlng) {
+            if (marker) { marker.setLatLng(latlng); }
+            else { marker = L.marker(latlng).addTo(map); }
+            document.getElementById("Latitude").value = latlng.lat;
+            document.getElementById("Longitude").value = latlng.lng;
+        }
+    </script>
+}

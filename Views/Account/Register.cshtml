@@ -1,0 +1,219 @@
+﻿@model lLOCALS.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "إنشاء حساب جديد - LOCALS";
+}
+
+@* مكتبة الأيقونات الضرورية *@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+<div class="auth-wrapper" dir="rtl">
+    <div class="auth-card shadow-lg border-0">
+        @* الهيدر باللون الزيتي الفخم *@
+        <div class="auth-header py-4 text-center text-white">
+            <h2 class="fw-bold mb-0">LOCALS</h2>
+            <p class="small opacity-75 mt-2">انضم إلينا واستكشف كنوز الوطن</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5 text-end">
+            <form asp-action="Register" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                @* حقل الاسم الكامل *@
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label fw-bold text-dark small">الاسم الكامل</label>
+                    <div class="input-group custom-input shadow-sm">
+                        <span class="input-group-text"><i class="fa fa-user"></i></span>
+                        <input asp-for="FullName" class="form-control" placeholder="أدخل اسمك الثلاثي" required />
+                    </div>
+                    <span asp-validation-for="FullName" class="text-danger small d-block mt-1"></span>
+                </div>
+
+                @* حقل البريد الإلكتروني *@
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label fw-bold text-dark small">البريد الإلكتروني</label>
+                    <div class="input-group custom-input shadow-sm">
+                        <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                        <input asp-for="Email" class="form-control" placeholder="example@mail.com" required />
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger small d-block mt-1"></span>
+                </div>
+
+                @* حقل كلمة المرور *@
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label fw-bold text-dark small">كلمة المرور</label>
+                    <div class="input-group password-wrapper custom-input shadow-sm">
+                        <span class="input-group-text"><i class="fa fa-lock"></i></span>
+                        <input asp-for="Password" id="passInput" type="password" class="form-control" placeholder="••••••••" required />
+                        <button type="button" class="toggle-password" onclick="togglePass('passInput', 'passIcon')">
+                            <i id="passIcon" class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small d-block mt-1"></span>
+                </div>
+
+                @* حقل تأكيد كلمة المرور *@
+                <div class="mb-4">
+                    <label asp-for="ConfirmPassword" class="form-label fw-bold text-dark small">تأكيد كلمة المرور</label>
+                    <div class="input-group password-wrapper custom-input shadow-sm">
+                        <span class="input-group-text"><i class="fa fa-lock"></i></span>
+                        <input asp-for="ConfirmPassword" id="confirmPassInput" type="password" class="form-control" placeholder="••••••••" required />
+                        <button type="button" class="toggle-password" onclick="togglePass('confirmPassInput', 'confirmPassIcon')">
+                            <i id="confirmPassIcon" class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small d-block mt-1"></span>
+                </div>
+
+                @* زر الاشتراك الوطني *@
+                <button type="submit" class="btn btn-national w-100 py-2 rounded-pill fw-bold shadow mt-2">
+                    إنشاء الحساب
+                </button>
+            </form>
+
+            @* التذييل باللون البني *@
+            <div class="text-center mt-4 border-top pt-4">
+                <p class="text-muted small mb-0">لديك حساب بالفعل؟</p>
+                <a asp-action="Login" class="text-brown fw-bold text-decoration-none small">تسجيل الدخول الآن</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        :root {
+            --national-green: #004d33; /* الزيتي الملكي */
+            --heritage-brown: #8b5a2b; /* البني التراثي */
+            --sand-bg: #f4f1ea; /* الخلفية الرملية الناعمة */
+        }
+
+        /* --- التعديل الأساسي هنا لجعل الخلفية تغطي كامل الصفحة --- */
+        body {
+            background-color: var(--sand-bg) !important;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .auth-wrapper {
+            min-height: 100vh; /* تأكد من أن الحاوية تأخذ كامل الطول */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparent; /* جعل الحاوية شفافة لتظهر خلفية الـ body */
+            padding: 40px 20px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            border-bottom: 6px solid var(--heritage-brown) !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important; /* ظل ناعم للبطاقة فوق الخلفية الترابية */
+        }
+
+        .auth-header {
+            background: var(--national-green);
+            position: relative;
+        }
+
+            .auth-header::after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: var(--heritage-brown);
+                opacity: 0.8;
+            }
+
+        .text-brown {
+            color: var(--heritage-brown);
+            transition: 0.3s;
+        }
+
+            .text-brown:hover {
+                color: var(--national-green);
+                text-decoration: underline !important;
+            }
+
+        /* تنسيق الحقول */
+        .custom-input .input-group-text {
+            background-color: #f8f9fa;
+            color: var(--national-green);
+            border-radius: 0 15px 15px 0 !important;
+            border: 1px solid #dee2e6;
+            min-width: 45px;
+            justify-content: center;
+        }
+
+        .custom-input .form-control {
+            border-radius: 15px 0 0 15px !important;
+            border: 1px solid #dee2e6;
+            font-size: 0.9rem;
+            padding-left: 45px !important;
+        }
+
+            .custom-input .form-control:focus {
+                border-color: var(--national-green);
+                box-shadow: 0 0 0 0.2rem rgba(0, 77, 51, 0.1);
+            }
+
+        /* زر العين */
+        .password-wrapper {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            z-index: 10;
+            color: #adb5bd;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        /* الزر الوطني الرئيسي */
+        .btn-national {
+            background: var(--national-green);
+            color: white;
+            border: none;
+            transition: 0.3s ease;
+        }
+
+            .btn-national:hover {
+                background: #003624;
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 77, 51, 0.3);
+            }
+    </style>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function togglePass(inputId, iconId) {
+            var input = document.getElementById(inputId);
+            var icon = document.getElementById(iconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+    </script>
+}
