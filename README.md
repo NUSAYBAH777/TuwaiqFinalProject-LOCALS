@@ -1,5 +1,5 @@
 # 📍 LOCALS : Riyadh Through Local Eyes
-[![Framework](https://img.shields.io/badge/Framework-ASP.NET%20Core%208.0%20MVC-512bd4)](https://dotnet.microsoft.com/en-us/apps/aspnet/mvc)
+[![Framework](https://img.shields.io/badge/Framework-ASP.NET%20Core%2010.0%20MVC-512bd4)](https://dotnet.microsoft.com/en-us/apps/aspnet/mvc)
 [![Database](https://img.shields.io/badge/Database-SQL%20Server-red)](https://www.microsoft.com/en-us/sql-server/)
 [![ORM](https://img.shields.io/badge/ORM-Entity%20Framework%20Core-blueviolet)](https://learn.microsoft.com/en-us/ef/core/)
 
@@ -17,20 +17,6 @@
 
 ---
 
-## 🛠 Technical Stack
-
-| Category | Technology |
-| :--- | :--- |
-| **Backend** | ASP.NET Core 10.0 (MVC Architecture) |
-| **Database** | SQL Server (Relational) |
-| **ORM** | Entity Framework Core |
-| **Frontend** | Razor Pages, JavaScript (ES6+), Bootstrap 5 |
-| **Maps** | Leaflet.js API |
-| **Security** | BCrypt.Net (Hashing) & Session-based RBAC |
-| **Design** | CSS3 Grid/Flexbox, Animate.css, Tajawal Fonts |
-
----
-
 ## 🏗 System Architecture
 
 The project follows the **MVC (Model-View-Controller)** pattern to ensure a clean **Separation of Concerns**:
@@ -38,6 +24,18 @@ The project follows the **MVC (Model-View-Controller)** pattern to ensure a clea
 * **Models:** Strongly typed data structures representing Riyadh's landmarks, users, and media galleries.
 * **Views:** Responsive Razor templates with a localized RTL (Right-to-Left) layout and a "National Green" visual identity.
 * **Controllers:** Logical engines handling data processing, geographic coordinate mapping, and secure authentication.
+
+---
+
+## 🛠 Technical Specifications
+
+| Layer | Implementation Details |
+| :--- | :--- |
+| **Authentication** | Secure custom identity management via **HttpContext Sessions**. |
+| **Security** | One-way cryptographic password hashing using **BCrypt.Net**. |
+| **Storage Strategy** | Physical server file-system storage with dynamic Database path-mapping. |
+| **Front-end Performance** | **Client-side DOM Manipulation** for zero-latency data filtering (JavaScript ES6). |
+| **UI/UX Identity** | RTL-optimized layout featuring the **Tajawal** typography and a "National Green" design system. |
 
 ---
 
